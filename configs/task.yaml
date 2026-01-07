@@ -1,0 +1,6 @@
+task:
+
+metrics:
+  - accuracy
+  - precision
+  
