@@ -1,0 +1,137 @@
+experiment:
+  name: flat_ground_locomotion_v1
+  version: v1
+  description: >
+    Evaluate robot morphology for forward locomotion on flat terrain under a fixed episode protocol.
+    The goal is to compare body designs using controller-agnostic success metrics: forward speed and
+    cost of transport, measured consistently across many trials.
+
+  changelog:
+    - Initial task contract with fixed 10s horizon and two metrics (speed, CoT).
+  frozen:
+    task: true
+    metrics: true
+    design_space: false
+
+task:
+  objective: forward_locomotion
+  start_state:
+    pose: upright_centered
+    velocity: zero
+    actuation: neutral
+  horizon:
+    type: time
+    value: 10.0
+    units: s
+  success:
+    definition: net forward displacement over horizon
+    threshold: 0.5
+    units: m
+  failure:
+    conditions:
+      - body_height_below_threshold_for_0p5s
+      - roll_or_pitch_exceeds_75deg_for_0p5s
+      - leaves_arena_bounds
+  assistance_policy: no_external_assistance_no_mid_episode_resets
+
+environment:
+  terrain:
+    type: flat_plane
+    parameters: {}
+  physics:
+    gravity: 9.81
+    friction:
+      type: range
+      min: 0.6
+      max: 0.9
+      rationale: capture moderate surface uncertainty without changing task class
+  bounds:
+    arena_size: [10.0, 5.0]
+    out_of_bounds: terminate
+  randomization:
+    enabled: true
+    varies:
+      - friction
+      - initial_yaw_small_noise
+    fixed:
+      - gravity
+      - terrain_flatness
+
+protocol:
+  termination:
+    timeout_s: 10.0
+    fall_condition: body_height_below_threshold_for_0p5s
+    out_of_bounds: terminate
+  reset:
+    method: hard_reset_to_start_state
+  trials:
+    n_trials_per_design: 20
+    n_designs: 50
+    seeding:
+      base_seed: 12345
+      per_trial_offset: 1000
+  logging:
+    rate_hz: 100
+    record:
+      - base_position
+      - base_orientation
+      - contact_forces
+      - joint_torques
+      - power
+
+metrics:
+  primary:
+    name: forward_speed
+    definition: average forward speed over the evaluation window
+    formula: vx = (x(t_end) - x(t_start)) / (t_end - t_start)
+    window:
+      start_s: 1.0
+      end_s: 10.0
+    aggregation: mean
+    units: m/s
+  secondary:
+    name: cost_of_transport
+    definition: energy per weight-distance under a fixed, shared open-loop controller
+    formula: CoT = E / (m * g * d_forward)
+    normalization: uses robot mass m and gravity g; d_forward uses same window as primary
+    aggregation: mean
+    units: unitless
+
+design_space:
+  note: initial reduced parameter set; expanded morphology parameters introduced in later iterations
+  parameters:
+    - name: leg_length
+      type: continuous
+      range: [0.05, 0.25]
+      units: m
+    - name: body_clearance
+      type: continuous
+      range: [0.02, 0.10]
+      units: m
+  constraints:
+    - must_start_upright_without_support
+    - minimum_clearance_met_in_start_pose
+
+control:
+  policy: shared_open_loop
+  parameters: fixed_across_designs
+  note: control is intentionally non-adaptive to isolate morphology effects
+
+
+sweep:
+  strategy: random
+  budget:
+    total_evals: 1000
+    parallel_workers: 10
+
+reproducibility:
+  determinism_notes: fixed start state; only declared randomization varies; all seeds logged
+  seeds:
+    sim_seed: 2026
+    design_seed: 777
+
+provenance:
+  author: Eleazar Asase
+  date: 2026-01-11
+  git_commit: Freeze task, metrics, and evaluation protocol for morphology-driven locomotion study
+
