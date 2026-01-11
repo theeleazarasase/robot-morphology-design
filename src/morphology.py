@@ -2,7 +2,7 @@ class Morphology:
     def __init__(self,num_legs :int, leg_length :float, body_radius :str, symmetry :bool=True):
         self.num_legs = num_legs
         self.leg_length = leg_length
-        self.body_shape = body_radius
+        self.body_radius = body_radius
         self.symmetry = symmetry
     """
     Represents the geometric and structural design of a robot.
