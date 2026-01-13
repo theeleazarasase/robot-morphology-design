@@ -22,24 +22,24 @@ for leg_length, body_clearance in itertools.product(leg_lengths,body_clearances)
 
         #dummy eval
         forward_dist = random.uniform(0.0, 2.0)
-        sucess = forward_dist > success_threshold
+        success = forward_dist > success_threshold
 
         row = {            
             "timestamp": datetime.utcnow().isoformat(),
-            "experiment_name": EXPERIMENT_NAME,
+            "experiment_name": experiment_name,
             "design_id": design_id,
             "leg_length_m": leg_length,
             "body_clearance_m": body_clearance,
-            "metric_forward_distance_m": forward_distance,
+            "metric_forward_distance_m": forward_dist,
             "success": success,
-            "success_threshold_m": SUCCESS_THRESHOLD,
+            "success_threshold_m": success_threshold,
             "seed": seed,
     
         }
         rows.append(row)
     design_id +=1
 df = pd.DataFrame(rows)
-log_path.parent.mkdire(parents=True, exist_ok =True)
+log_path.parent.mkdir(parents=True, exist_ok =True)
 
 if log_path.exists():
     df.to_csv(log_path, mode="a", header=False, index =False)

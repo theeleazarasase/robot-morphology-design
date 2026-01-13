@@ -2,7 +2,7 @@ import pandas as pd
 import random
 from pathlib import Path
 
-LOG_PATH = Path("results/logss.csv")
+LOG_PATH = Path("results/logs.csv")
 
 experiment_name = "flat_ground_dummy_v1"
 
