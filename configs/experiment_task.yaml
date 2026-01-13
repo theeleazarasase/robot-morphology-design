@@ -68,8 +68,10 @@ protocol:
     n_trials_per_design: 20
     n_designs: 50
     seeding:
-      base_seed: 12345
+      scheme: affine_from_sim_seed
       per_trial_offset: 1000
+      per_design_offset: 100000
+      note: seed = sim_seed + design_idx*per_design_offset + trial_idx*per_trial_offset
   logging:
     rate_hz: 100
     record:

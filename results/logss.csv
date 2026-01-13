@@ -1,0 +1,4 @@
+experiment_name,design_id,leg_length,body_clearance,forward_distance,success,seed
+flat_ground_dummy_v1,0,0.1,0.04,1.6888437030500962,True,0
+flat_ground_dummy_v1,1,0.18,0.06,0.26872848822480244,False,1
+flat_ground_dummy_v1,2,0.22,0.08,1.9120685437784988,True,2
