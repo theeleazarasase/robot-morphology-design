@@ -1,4 +1,3 @@
-```markdown
 # A Computational Design Pipeline for Generating and Evaluating Robot Morphologies
 
 ## 1. Research Question
@@ -7,6 +6,7 @@
 
 Answer explicitly:
 - What is unknown today?
+Co Joint Design using limns and
 - What are you testing or enabling?
 
 **Template:**
@@ -130,4 +130,3 @@ Explicitly state:
 ## Contact
 
 [Your contact information]
-```
