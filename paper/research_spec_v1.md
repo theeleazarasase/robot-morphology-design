@@ -1,132 +1,89 @@
-# A Computational Design Pipeline for Generating and Evaluating Robot Morphologies
+# Title (Working):Establishing Interpretable Morphology Axes for Controlled Evaluation of Legged Robot Locomotion
 
 ## 1. Research Question
+How do controlled low dimesional changes in robot morphology affect locomotion performance under a fixed task and evaluation protocol in simulation?
 
-**3–4 sentences max**
+The project isolates morphology as the independent variable holding task, episode structure, metrics and evaluation pipeline constant
 
-Answer explicitly:
-- What is unknown today?
-Co Joint Design using limns and
-- What are you testing or enabling?
-
-**Template:**
-
-How can we design a computational pipeline that generates diverse, physically valid robot morphologies using interpretable parameters, and evaluate them fairly under a fixed locomotion task without bias toward specific controllers or hand-designed forms?
-
-> You may tweak, but do not expand.
-
----
+The Goal therefore is not to find the best robot but to establish a stable interpretable morphology axis that produces measurable, reproducible effects.is unknown today?
 
 ## 2. Motivation
+Robotics research frequently optimizes morphology and control jointly which makes it difficult to attribute performance differences to body design versus controller behavior.
+As such While prior work provides valuable insights, differences in morphology, control, and evaluation protocols make cross-study attribution challenging.
 
-**Why anyone should care**
+This project addresses this by constructing a controlled experimental setup where:
+- morp-hology varies in a principled, minimal way,
+- evaluation is fixed and repeatable,
+- and observed performance changes can be directly attributed to body parameters.
 
-Touch on:
-- Manual robot design is slow and biased
-- Morphology is underexplored relative to control
-- Fair comparison across designs is rare
+## 3. Scope and assumptions
 
-> **📌 Note:** Keep it high-level, no citations yet.
+**In Scope**
+- Simulated legged robots
+- Flat-ground forward locomotion
+- Parametric morphology variation
+- Controller-agnostic evaluation metrics
 
----
+**Out of Scope**
+- Sim-to-real transfer
+- Learning algorithm comparison
+- Adaptive or online morphology change
+- Uneven terrain or disturbance recovery
 
-## 3. Task Definition
-
-**This anchors the entire project**
+## 4. Task Definition
 
 | Aspect | Specification |
 |--------|---------------|
-| **Task** | Flat-ground forward locomotion |
+| **Task** | Forward locomotion on flat terrain |
 | **Horizon** | 10 seconds |
 | **Environment** | Flat terrain, randomized friction |
 | **Initial State** | Upright, zero velocity |
+| **Termination conditions** | fall, instability, or leaving arena bounds|
 
-**State explicitly:**
 
-> All designs are evaluated under identical task and environment contracts.
-
----
-
-## 4. Metrics
+## 5. Evaluation Metrics
 
 **No more than TWO**
 
-1. **Primary:** Average forward speed
-2. **Secondary:** Cost of transport
+1. **Primary:** Average forward speed(m/s)
+2. **Secondary:** Cost of transport(unitless)
+
+**Success Criterion**:
+Net forward displacement ≥ 0.5 m over the episode horizon.
 
 **Why these two:**
-- **Speed** → task effectiveness
-- **CoT** → physical efficiency
+Metrics are:
+- controller-agnostic,
+- consistently computed,
+- and logged at fixed resolution
 
-> **Note:** This is where many papers fail. Yours won't.
+## 6. Design Space/Morphology axis
 
----
+## Current parameters:
+- Leg length(continous)
+- Body clearance(continous)
 
-## 5. Design Space
+## Design Constraints:
+- Must start upright without support
+- Must satisfy minimum clearance at rest(start pose)
 
-**What you control**
 
-### Current parameters:
-- Leg length
-- Body clearance
+> The design space is intentionally low-dimensional to enable interpretability and controlled analysis. No controller parameters are optimized as part of the design sweep
 
-### Constraints:
-- Must start upright
-- Must satisfy minimum clearance at rest
 
-**State clearly:**
-
-> The design space is intentionally low-dimensional to enable interpretability and controlled analysis.
-
----
-
-## 6. Computational Pipeline
-
-**This becomes your Figure 1**
-
-### Numbered workflow:
+## 7. Computational Pipeline
 
 1. Sample morphology parameters
 2. Generate robot geometry
-3. Simulate under fixed task
-4. Log metrics across trials
+3. Simulate under fixed horizon simulation trials
+4. Log state, enrgy and contact data
 5. Aggregate results per design
+6. Compare performance across morphology variants
 
-### Diagram:
 
-```
-Geometry → Simulation → Evaluation → Analysis
-```
+## 8. Expected Contributions
+- A validated morphology parameterization
+- Performance trends attributable to body design
+- A reproducible experimental setup suitable for extension
 
-> Simple. Clean. Reviewers love this.
 
----
-
-## 7. Expected Contributions
-
-**Do not overpromise**
-
-- [ ] A reproducible task-level evaluation framework for morphology studies
-- [ ] A parametric morphology generator suitable for automated search
-- [ ] Empirical insights into how simple geometric parameters affect locomotion
-
----
-
-## 8. Scope and Limitations
-
-**This signals maturity**
-
-Explicitly state:
-- ❌ No controller learning (initially)
-- ❌ No complex terrain
-- ❌ Simulation-only in early phase
-
----
-
-## License
-
-[Specify your license here]
-
-## Contact
-
-[Your contact information]
