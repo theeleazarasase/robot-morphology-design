@@ -85,5 +85,6 @@ Metrics are:
 - A validated morphology parameterization
 - Performance trends attributable to body design
 - A reproducible experimental setup suitable for extension
+- Visualizations for paper
 
 
