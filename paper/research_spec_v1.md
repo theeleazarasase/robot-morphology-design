@@ -80,7 +80,7 @@ Metrics are:
 6. Compare performance across morphology variants
 
 
-## 8. Expected Contributions
+# 8. Expected Contributions
 - A validated morphology parameterization
 - Performance trends attributable to body design
 - A reproducible experimental setup suitable for extension
