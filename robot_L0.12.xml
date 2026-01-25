@@ -12,7 +12,7 @@
 
       <body name="leg" pos="0 0 0">
         <joint name="hip" type="hinge" axis="0 1 0" range="-30 30"/>
-        <geom type="capsule" fromto="0 0 0 0 0 -0.12" size="0.01" rgba="0.2 0.6 0.2 1"/>
+        <geom type="box" pos="0 0 -0.06" size="0.01 0.01 0.06" rgba="0.2 0.6 0.2 1"/>
       </body>
     </body>
   </worldbody>
