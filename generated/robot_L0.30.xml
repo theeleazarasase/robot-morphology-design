@@ -1,0 +1,43 @@
+<mujoco model="biped_template">
+  <option timestep="0.005" gravity="0 0 -9.81"/>
+
+  <visual>
+    <map force="0.1" zfar="30"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <quality shadowsize="2048"/>
+    <global offwidth="800" offheight="800"/>
+  </visual>
+
+  <worldbody>
+    <light pos="0 0 3" dir="0 0 -1" directional="true"/>
+    <geom name="floor" type="plane" size="10 10 0.1" rgba="0.9 0.9 0.9 1" friction="1 0.005 0.0001"/>
+
+    <body name="torso" pos="0 0 0.360">
+      <joint name="root" type="free"/>
+      <geom type="box" size="0.1 0.05 0.05" rgba="0.2 0.6 0.2 1" density="1000"/>
+
+      <body name="leg_left" pos="0 0.06 0">
+        <joint name="hip_left" type="hinge" axis="0 1 0" range="-45 45"/>
+        <geom type="box" fromto="0 0 0  0 0 -0.3" size="0.02" rgba="0.7 0.7 0.7 1"/>
+        <body name="foot_left" pos="0 0 -0.3">
+             <geom type="box" size="0.04 0.03 0.01" pos="0.02 0 0" rgba="0.9 0.2 0.2 1"/>
+        </body>
+      </body>
+
+      <body name="leg_right" pos="0 -0.06 0">
+        <joint name="hip_right" type="hinge" axis="0 1 0" range="-45 45"/>
+        <geom type="box" fromto="0 0 0  0 0 -0.3" size="0.02" rgba="0.7 0.7 0.7 1"/>
+        <body name="foot_right" pos="0 0 -0.3">
+             <geom type="box" size="0.04 0.03 0.01" pos="0.02 0 0" rgba="0.9 0.2 0.2 1"/>
+        </body>
+      </body>
+
+    </body>
+  </worldbody>
+  
+  <actuator>
+    <position joint="hip_left" kp="50" dampratio="1.0"/>
+    <position joint="hip_right" kp="50" dampratio="1.0"/>
+  </actuator>
+
+</mujoco>
