@@ -1,5 +1,5 @@
 <mujoco model="biped_template">
-  <option timestep="0.005" gravity="0 0 -9.81"/>
+  <option timestep="0.002" gravity="0 0 -9.81"/>
 
   <visual>
     <map force="0.1" zfar="30"/>
@@ -7,7 +7,11 @@
     <quality shadowsize="2048"/>
     <global offwidth="800" offheight="800"/>
   </visual>
-
+  
+  <default>
+     <joint armature="0.01" damping="0.1"/>
+     <geom solref="0.02 1" solimp="0.9 0.95 0.001"/>
+  </default>
   <worldbody>
     <light pos="0 0 3" dir="0 0 -1" directional="true"/>
     <geom name="floor" type="plane" size="10 10 0.1" rgba="0.9 0.9 0.9 1" friction="1 0.005 0.0001"/>
