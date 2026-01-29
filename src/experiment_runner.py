@@ -13,95 +13,160 @@ class EpisodeStatus(Enum):
     COMPLETED = "Completed"          # Survived full duration
     TERMINATED_FAILURE = "Failure"   # Fallen or NaN
     
-def run_episode(model_path, duration=5.0, seed=None, controller_func=None):
+# src/experiment_runner.py (Partial Update)
+
+def run_episode(model_path, duration=5.0, seed=None, controller=None):
     """
-    Executes a single, atomic simulation episode.
+    Runs a single simulation episode.
     
     Args:
-        model_path (str): Path to XML file.
-        duration (float): Max simulation time in seconds.
-        seed (int): RNG seed for reproducibility.
-        controller_func (callable): Optional f(model, data) -> None to apply control.
-        
-    Returns:
-        dict: A standardized result packet containing metadata, metrics, and history.
+        model_path (str): Path to the XML file.
+        duration (float): Max time in seconds.
+        seed (int): Random seed.
+        controller (object): An object with a .get_action(time) method.
     """
+    # ... (Setup code remains the same: load model, reset data) ...
+    if seed is not None:
+        np.random.seed(seed)
     
-    # --- 1. SETUP (State: INITIALIZED) ---
     model = mujoco.MjModel.from_xml_path(model_path)
     data = mujoco.MjData(model)
     
-    # Deterministic Reset (Day 13 Logic)
-    simulation_utils.reset_simulation(model, data, seed)
-    
-    status = EpisodeStatus.RUNNING
-    termination_reason = "TimeLimit" # Default assumption
+    # Deterministic Reset
+    mujoco.mj_resetData(model, data)
+    mujoco.mj_forward(model, data)
     
     history = []
+    status = EpisodeStatus.RUNNING
+    reason = None
     
-    # Calculate max steps based on dt
-    max_steps = int(duration / model.opt.timestep)
-    start_x = data.qpos[0]
-    
-    # --- 2. SIMULATION LOOP (State: RUNNING) ---
-    for step in range(max_steps):
+    # === THE MAIN LOOP ===
+    while data.time < duration:
         
-        # A. Apply Control
-        if controller_func:
-            controller_func(model, data)
+        # 1. GET CONTROL SIGNAL (The New Part)
+        if controller is not None:
+            # Ask the brain for angles based on current time
+            action = controller.get_action(data.time)
+            # Apply to motors (assuming action order matches actuator order)
+            data.ctrl[:] = action
             
-        # B. Step Physics
+        # 2. STEP PHYSICS
         mujoco.mj_step(model, data)
         
-        # C. Check Failure
-        failed, reason = check_failure(data)
-        
-        if failed:
+        # 3. CHECK FOR FAILURE (The Referee)
+        # Check for NaN (Explosion)
+        if np.isnan(data.qpos).any():
             status = EpisodeStatus.TERMINATED_FAILURE
-            termination_reason = reason
-            break # <--- THE CONTRACT: Stop immediately.
+            reason = "NaN detected (Simulation Explosion)"
+            break
             
-        # D. Log History
-        snapshot = {
-            "time": float(data.time),
-            "x_pos": float(data.qpos[0]),
-            "z_pos": float(data.qpos[2]), 
+        # Check for Fall (Torso Z < 0.05m roughly)
+        # Note: We use body name 'torso' index usually, or just qpos[2] for simple root
+        if data.qpos[2] < 0.10: # Threshold: 10cm off ground
+            status = EpisodeStatus.TERMINATED_FAILURE
+            reason = f"Body too low: z={data.qpos[2]:.3f}m"
+            break
+
+        # 4. LOGGING (Record data)
+        # ... (Logging code remains the same) ...
+        history.append({
+            "time": data.time,
+            "x_pos": data.qpos[0],
+            "z_pos": data.qpos[2],
             "alive": True
-        }
-        history.append(snapshot)
-        
-    # --- 3. FINALIZE (State Transition) ---
-    # CRITICAL FIX: If we exited loop naturally, we succeeded.
+        })
+
+    # ... (Cleanup and return code remains the same) ...
+    
+    # Calculate final metrics
+    final_x = data.qpos[0]
+    total_distance = final_x  # Assuming start at 0
+    
     if status == EpisodeStatus.RUNNING:
         status = EpisodeStatus.COMPLETED
+        reason = "Time Limit Reached"
+        
+    return {
+        "metadata": {"model": model_path, "duration": duration, "seed": seed},
+        "metrics": {"total_distance": total_distance, "survival_time": data.time},
+        "status": {"state": status.name, "reason": reason},
+        "history": history
+    }# src/experiment_runner.py (Partial Update)
 
-    # Calculate summary metrics
-    final_time = data.time
+def run_episode(model_path, duration=5.0, seed=None, controller=None):
+    """
+    Runs a single simulation episode.
+    
+    Args:
+        model_path (str): Path to the XML file.
+        duration (float): Max time in seconds.
+        seed (int): Random seed.
+        controller (object): An object with a .get_action(time) method.
+    """
+    # ... (Setup code remains the same: load model, reset data) ...
+    if seed is not None:
+        np.random.seed(seed)
+    
+    model = mujoco.MjModel.from_xml_path(model_path)
+    data = mujoco.MjData(model)
+    
+    # Deterministic Reset
+    mujoco.mj_resetData(model, data)
+    mujoco.mj_forward(model, data)
+    
+    history = []
+    status = EpisodeStatus.RUNNING
+    reason = None
+    
+    # === THE MAIN LOOP ===
+    while data.time < duration:
+        
+        # 1. GET CONTROL SIGNAL (The New Part)
+        if controller is not None:
+            # Ask the brain for angles based on current time
+            action = controller.get_action(data.time)
+            # Apply to motors (assuming action order matches actuator order)
+            data.ctrl[:] = action
+            
+        # 2. STEP PHYSICS
+        mujoco.mj_step(model, data)
+        
+        # 3. CHECK FOR FAILURE (The Referee)
+        # Check for NaN (Explosion)
+        if np.isnan(data.qpos).any():
+            status = EpisodeStatus.TERMINATED_FAILURE
+            reason = "NaN detected (Simulation Explosion)"
+            break
+            
+        # Check for Fall (Torso Z < 0.05m roughly)
+        # Note: We use body name 'torso' index usually, or just qpos[2] for simple root
+        if data.qpos[2] < 0.10: # Threshold: 10cm off ground
+            status = EpisodeStatus.TERMINATED_FAILURE
+            reason = f"Body too low: z={data.qpos[2]:.3f}m"
+            break
+
+        # 4. LOGGING (Record data)
+        # ... (Logging code remains the same) ...
+        history.append({
+            "time": data.time,
+            "x_pos": data.qpos[0],
+            "z_pos": data.qpos[2],
+            "alive": True
+        })
+
+    # ... (Cleanup and return code remains the same) ...
+    
+    # Calculate final metrics
     final_x = data.qpos[0]
-    dist = final_x - start_x
+    total_distance = final_x  # Assuming start at 0
     
-    # Mark last frame as dead if we failed
-    if status == EpisodeStatus.TERMINATED_FAILURE:
-        if history:
-            history[-1]["alive"] = False
-    
-    result = {
-        "metadata": {
-            "seed": seed,
-            "duration": duration,
-            "model": model_path
-        },
-        "metrics": {
-            "total_distance": dist,
-            "survival_time": final_time,
-            "avg_speed": dist / final_time if final_time > 0 else 0.0
-        },
-        "status": {
-            # REFINED SCHEMA: "success" means we survived the full duration
-            "success": (status == EpisodeStatus.COMPLETED),
-            "reason": termination_reason
-        },
+    if status == EpisodeStatus.RUNNING:
+        status = EpisodeStatus.COMPLETED
+        reason = "Time Limit Reached"
+        
+    return {
+        "metadata": {"model": model_path, "duration": duration, "seed": seed},
+        "metrics": {"total_distance": total_distance, "survival_time": data.time},
+        "status": {"state": status.name, "reason": reason},
         "history": history
     }
-    
-    return result 
