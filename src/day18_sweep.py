@@ -6,7 +6,7 @@ from experiment_runner import run_episode
 from controllers import SineWaveController
 
 def run_sweep():
-    print("🧪 Day 18: Morphological Sweep (Leg Length vs Stability)")
+    print("Day 18: Morphological Sweep (Leg Length vs Stability)")
     print("=" * 60)
 
     # 1. SETUP & DISCOVERY
@@ -32,7 +32,7 @@ def run_sweep():
     morphologies.sort(key=lambda x: x[0])
 
     if not morphologies:
-        print(f"❌ Error: No robot files found in {generated_dir}")
+        print(f" Error: No robot files found in {generated_dir}")
         print("   Did you run make_robot.py?")
         return
 
@@ -97,14 +97,14 @@ def run_sweep():
     avg_short = np.mean([r['Time'] for r in short_legs])
     avg_tall = np.mean([r['Time'] for r in tall_legs])
 
-    print(f"\n📊 Hypothesis Test:")
+    print(f"\n Hypothesis Test:")
     print(f"   Avg Survival (Short): {avg_short:.2f}s")
     print(f"   Avg Survival (Tall):  {avg_tall:.2f}s")
     
     if avg_short > avg_tall:
-        print("✅ CONCLUSION: H1 Supported (Short legs are more stable)")
+        print(" CONCLUSION: H1 Supported (Short legs are more stable)")
     else:
-        print("❌ CONCLUSION: H0 Supported (No stability advantage for short legs)")
+        print(" CONCLUSION: H0 Supported (No stability advantage for short legs)")
 
 if __name__ == "__main__":
     run_sweep()
